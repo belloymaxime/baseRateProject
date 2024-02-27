@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Result</title>
+</head>
+<body>
+    <h2>Form Data</h2>
+    <p><strong>Round:</strong> {{ round }}</p>
+    <p><strong>Last round Valuation:</strong> {{ lastroundvaluation }}</p>
+    <p><strong>Equity %:</strong> {{ equity }}</p>
+    <p><strong>Sector:</strong> {{ sector }}</p>
+    <h2>Base Rates</h2>
+    <p><strong>Next round %:</strong> {{ base_rate_next_round }}</p>
+    <p><strong>Exit round %:</strong> {{ base_rate_exit }}</p>
+    <p><strong>Exit &lt; 200M:</strong> {{ exit_lt_200M }}</p>
+    <p><strong>Exit 200M-500M:</strong> {{ exit_200M_500M }}</p>
+    <p><strong>Exit 500M-1B %:</strong> {{ exit_500M_1B }}</p>
+    <p><strong>Exit 1B-2B %:</strong> {{ exit_1B_2B }}</p>
+    <p><strong>Exit 2B-5B %:</strong> {{ exit_2B_5B }}</p>
+    <p><strong>Exit 5B-10B %:</strong> {{ exit_5B_10B }}</p>
+    <p><strong>Exit &gt; 10B %:</strong> {{ exit_gt_10B }}</p>
+    <p><strong>Exit no Valuation %:</strong> {{ exit_no_valuation }}</p>
+    <p><strong>Median headcount:</strong> {{ median_headcount }}</p>
+    <p><strong>Estimated ARR per FTE from Headcount + ICONIQ report:</strong> {{ estimated_arr_per_fte }}</p>
+    <p><strong>Estimated ARR:</strong> {{ estimated_arr }}</p>
+    <p><strong>Average funding:</strong> {{ average_funding }}</p>
+    <p><strong>Median funding:</strong> {{ median_funding }}</p>
+    <p><strong>Average time to next round in typical series (days):</strong> {{ avg_time_to_next_round_typical }}</p>
+    <p><strong>Median time to next round in typical series (days):</strong> {{ median_time_to_next_round_typical }}</p>
+    <p><strong>Average time to any next round (days):</strong> {{ avg_time_to_any_next_round }}</p>
+    <p><strong>Median time to any next round (days):</strong> {{ median_time_to_any_next_round }}</p>
+    <p><strong>Average time to exit (days):</strong> {{ avg_time_to_exit }}</p>
+    <p><strong>Median time to exit (days):</strong> {{ median_time_to_exit }}</p>
+    <p><strong>Expected value of outcome:</strong> {{ expected_value_of_outcome }}</p>
+    <a href="https://docs.google.com/spreadsheets/d/1OXdKSdTFxn_udzRq4ZZt58mraml3qD12CBh06TT6A2c/edit?usp=sharing" target="_blank">
+        <button>See All Data</button>
+    </a>
+    <a href="/">
+        <button>Back to Form</button>
+    </a>
+</body>
+</html>
