@@ -24,7 +24,14 @@ def index():
             lastroundvaluation = 0
         if equity == '':
             equity = 0
-
+        try:
+            lastroundvaluation = int(lastroundvaluation)
+        except:
+            lastroundvaluation = 0
+        try:
+            equity = int(equity)
+        except:
+            equity = 0
         
         base_rate_next_round = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Next round %', 0)) if base_rates[sector][roundVal].get('Next round %', 0) != "N/A" else "N/A"
         base_rate_exit = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit round %', 0)) if base_rates[sector][roundVal].get('Exit round %', 0) != "N/A" else "N/A"
@@ -61,4 +68,4 @@ def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0",port=8080, debug=True)
