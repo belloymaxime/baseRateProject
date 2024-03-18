@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import json 
+from math import exp
 
 
 
@@ -53,17 +54,30 @@ def index():
         avg_time_to_any_next_round = str(round(int(base_rates[sector][roundVal].get('Average time to any next round (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Average time to any next round (days)', 0) != "N/A" else "N/A"
         median_time_to_any_next_round = str(round(int(base_rates[sector][roundVal].get('Median time to any next round (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to any next round (days)', 0) != "N/A" else "N/A"
         avg_time_to_exit = str(round(int(base_rates[sector][roundVal].get('average time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('average time to exit (days)', 0) != "N/A" else "N/A"
-        median_time_to_exit = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
+        median_time_to_exit = str(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
         expected_value_of_outcome = round(int(base_rates[sector][roundVal].get('Expected value of outcome', 0))) if base_rates[sector][roundVal].get('Expected value of outcome', 0) != "N/A" else "N/A"
 
 
 
-
+        meanExit = int(equity)*expected_value_of_outcome/100
+        try:
+            prob_gain_0_500K = "{:.2f}%".format(100 *(1-exp(-(1/meanExit)*500000)) * base_rates[sector][roundVal].get('Exit round %', 0))
+            prob_gain_500K_1M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*1000000)) - (1-exp(-(1/meanExit)*500000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+            prob_gain_1_5M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*5000000)) - (1-exp(-(1/meanExit)*1000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+            prob_gain_5M_10M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*10000000)) - (1-exp(-(1/meanExit)*5000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+            prob_gain_10M_plus = "{:.2f}%".format(100 *(1 - (1-exp(-(1/meanExit)*10000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+        except:
+            prob_gain_0_500K = 0
+            prob_gain_500K_1M = 0
+            prob_gain_1_5M = 0
+            prob_gain_5M_10M = 0
+            prob_gain_10M_plus = 0    
 
 
 
         # Inside the index() function
-        return render_template('result.html', round=roundVal, lastroundvaluation=lastroundvaluation, equity="{:.2f}%".format(int(equity)), sector=sector, base_rate_next_round=base_rate_next_round, base_rate_exit=base_rate_exit, exit_lt_200M=exit_lt_200M, exit_200M_500M=exit_200M_500M, exit_500M_1B=exit_500M_1B, exit_1B_2B=exit_1B_2B, exit_2B_5B=exit_2B_5B, exit_5B_10B=exit_5B_10B, exit_gt_10B=exit_gt_10B, exit_no_valuation=exit_no_valuation, median_headcount=median_headcount, estimated_arr_per_fte=estimated_arr_per_fte, estimated_arr=estimated_arr, average_funding=average_funding, median_funding=median_funding, avg_time_to_next_round_typical=avg_time_to_next_round_typical, median_time_to_next_round_typical=median_time_to_next_round_typical, avg_time_to_any_next_round=avg_time_to_any_next_round, median_time_to_any_next_round=median_time_to_any_next_round, avg_time_to_exit=avg_time_to_exit, median_time_to_exit=median_time_to_exit, expected_value_of_outcome= "${:,.0f}".format(round(expected_value_of_outcome*int(equity)/100)))
+        return render_template('result.html', round=roundVal, lastroundvaluation=lastroundvaluation, equity="{:.2f}%".format(int(equity)), sector=sector, base_rate_next_round=base_rate_next_round, base_rate_exit=base_rate_exit, exit_lt_200M=exit_lt_200M, exit_200M_500M=exit_200M_500M, exit_500M_1B=exit_500M_1B, exit_1B_2B=exit_1B_2B, exit_2B_5B=exit_2B_5B, exit_5B_10B=exit_5B_10B, exit_gt_10B=exit_gt_10B, exit_no_valuation=exit_no_valuation, median_headcount=median_headcount, estimated_arr_per_fte=estimated_arr_per_fte, estimated_arr=estimated_arr, average_funding=average_funding, median_funding=median_funding, avg_time_to_next_round_typical=avg_time_to_next_round_typical, median_time_to_next_round_typical=median_time_to_next_round_typical, avg_time_to_any_next_round=avg_time_to_any_next_round, median_time_to_any_next_round=median_time_to_any_next_round, avg_time_to_exit=avg_time_to_exit, median_time_to_exit=median_time_to_exit, expected_value_of_outcome= "${:,.0f}".format(round(expected_value_of_outcome*int(equity)/100))
+                               , prob_gain_0_500K=prob_gain_0_500K, prob_gain_500K_1M=prob_gain_500K_1M, prob_gain_1_5M=prob_gain_1_5M, prob_gain_5M_10M=prob_gain_5M_10M, prob_gain_10M_plus=prob_gain_10M_plus)
 
     return render_template('index.html')
 
