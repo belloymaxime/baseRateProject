@@ -44,7 +44,7 @@ def index():
         exit_5B_10B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit 5B-10B %', 0)) if base_rates[sector][roundVal].get('Exit 5B-10B %', 0) != "N/A" else "N/A"
         exit_gt_10B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit > 10 B %', 0)) if base_rates[sector][roundVal].get('Exit > 10 B %', 0) != "N/A" else "N/A"
         exit_no_valuation = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit no Valuation %', 0)) if base_rates[sector][roundVal].get('Exit no Valuation %', 0) != "N/A" else "N/A"
-        median_headcount = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Median headcount', 0)))) if base_rates[sector][roundVal].get('Median headcount', 0) != "N/A" else "N/A"
+        median_headcount = str(round(int(base_rates[sector][roundVal].get('Median headcount', 0)))) + "days" if base_rates[sector][roundVal].get('Median headcount', 0) != "N/A" else "N/A"
         estimated_arr_per_fte = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Estimated ARR per FTE from Headcount + ICONIQ report', 0)))) if base_rates[sector][roundVal].get('Estimated ARR per FTE from Headcount + ICONIQ report', 0) != "N/A" else "N/A"
         estimated_arr = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Estimated ARR', 0)))) if base_rates[sector][roundVal].get('Estimated ARR', 0) != "N/A" else "N/A"
         average_funding = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Average funding', 0)))) if base_rates[sector][roundVal].get('Average funding', 0) != "N/A" else "N/A"
