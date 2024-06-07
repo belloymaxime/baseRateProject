@@ -1,5 +1,5 @@
 {
-  "pre_seed": {
+  "Pre Seed": {
     "ARR between 0 and 2": 0.8911184784505322,
     "ARR between 2 and 5": 0.08201012039783633,
     "ARR between 5 and 10": 0.01605304484383179,
@@ -11,7 +11,7 @@
     "ARR between 1000 and inf": 0.0008724480893386843,
     "count": 5731
   },
-  "seed": {
+  "Seed": {
     "ARR between 0 and 2": 0.6882384373330167,
     "ARR between 2 and 5": 0.24158404084782997,
     "ARR between 5 and 10": 0.04862554176809357,
@@ -23,7 +23,7 @@
     "ARR between 1000 and inf": 0.0006530903045775693,
     "count": 16843
   },
-  "series_a": {
+  "Series A": {
     "ARR between 0 and 2": 0.3171754835702633,
     "ARR between 2 and 5": 0.41016080167793056,
     "ARR between 5 and 10": 0.1796783966441389,
@@ -35,7 +35,7 @@
     "ARR between 1000 and inf": 0.0015147984152878117,
     "count": 8582
   },
-  "series_b": {
+  "Series B": {
     "ARR between 0 and 2": 0.1282695124503034,
     "ARR between 2 and 5": 0.2667922159447583,
     "ARR between 5 and 10": 0.30947897049591966,
@@ -47,7 +47,7 @@
     "ARR between 1000 and inf": 0.0010462439840970914,
     "count": 4779
   },
-  "series_c": {
+  "Series C": {
     "ARR between 0 and 2": 0.09022887323943662,
     "ARR between 2 and 5": 0.1382042253521127,
     "ARR between 5 and 10": 0.21919014084507044,
@@ -59,7 +59,7 @@
     "ARR between 1000 and inf": 0.0017605633802816902,
     "count": 2272
   },
-  "series_d": {
+  "Series D": {
     "ARR between 0 and 2": 0.06742738589211618,
     "ARR between 2 and 5": 0.10062240663900415,
     "ARR between 5 and 10": 0.12033195020746888,
@@ -71,7 +71,7 @@
     "ARR between 1000 and inf": 0.002074688796680498,
     "count": 964
   },
-  "series_e": {
+  "Series E": {
     "ARR between 0 and 2": 0.022058823529411766,
     "ARR between 2 and 5": 0.06862745098039216,
     "ARR between 5 and 10": 0.09803921568627451,
@@ -83,7 +83,7 @@
     "ARR between 1000 and inf": 0.012254901960784314,
     "count": 408
   },
-  "series_f": {
+  "Series F": {
     "ARR between 0 and 2": 0.005376344086021506,
     "ARR between 2 and 5": 0.03763440860215054,
     "ARR between 5 and 10": 0.06989247311827956,
@@ -95,7 +95,7 @@
     "ARR between 1000 and inf": 0.04838709677419355,
     "count": 186
   },
-  "private_equity": {
+  "Private Equity": {
     "ARR between 0 and 2": 0.11014788373278939,
     "ARR between 2 and 5": 0.16522182559918408,
     "ARR between 5 and 10": 0.19530851606323305,
