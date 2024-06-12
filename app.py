@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+from datetime import datetime, timedelta
 import os
 import json 
 from math import exp
@@ -7,6 +8,7 @@ from math import exp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+app.permanent_session_lifetime = timedelta(minutes=10)
 
 # Dummy database of base rates
 
@@ -55,6 +57,14 @@ PASSWORD = "menloSourcing"
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if 'authenticated' in session and session['authenticated']:
+        last_activity = session.get('last_activity', None)
+        if last_activity and (datetime.now() - last_activity > app.permanent_session_lifetime):
+            # Session has expired, force the user to log in again
+            session.clear()
+            return redirect(url_for('login'))
+        else:
+            # Update the last activity time
+            session['last_activity'] = datetime.now()
         if request.method == 'POST':
             roundVal = request.form['round']
             lastroundvaluation = request.form['lastroundvaluation'] 
