@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+import pytz  
 import os
 import json 
 from math import exp
@@ -8,9 +9,8 @@ from math import exp
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-app.permanent_session_lifetime = timedelta(minutes=10)
+app.permanent_session_lifetime = timedelta(minutes=10)  # Session timeout duration
 
-# Dummy database of base rates
 
 
 
@@ -58,13 +58,20 @@ PASSWORD = "menloSourcing"
 def index():
     if 'authenticated' in session and session['authenticated']:
         last_activity = session.get('last_activity', None)
-        if last_activity and (datetime.now() - last_activity > app.permanent_session_lifetime):
-            # Session has expired, force the user to log in again
-            session.clear()
-            return redirect(url_for('login'))
+        if last_activity:
+            # Convert both datetime objects to offset-aware or offset-naive
+            now = pytz.utc.localize(datetime.now(timezone.utc))  # Convert to offset-aware
+            last_activity = pytz.utc.localize(last_activity)  # Convert to offset-aware
+
+            if now - last_activity > app.permanent_session_lifetime:
+                # Session has expired, force the user to log in again
+                session.clear()
+                return redirect(url_for('login'))
         else:
             # Update the last activity time
-            session['last_activity'] = datetime.now()
+            session['last_activity'] = datetime.now(timezone.utc)
+
+        
         if request.method == 'POST':
             roundVal = request.form['round']
             lastroundvaluation = request.form['lastroundvaluation'] 
