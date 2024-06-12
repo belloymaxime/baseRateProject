@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from datetime import datetime, timedelta, timezone
-import pytz  
 import os
 import json 
 from math import exp
@@ -59,9 +58,12 @@ def index():
     if 'authenticated' in session and session['authenticated']:
         last_activity = session.get('last_activity', None)
         if last_activity:
-            # Convert both datetime objects to offset-aware or offset-naive
-            now = pytz.utc.localize(datetime.now(timezone.utc))  # Convert to offset-aware
-            last_activity = pytz.utc.localize(last_activity)  # Convert to offset-aware
+            # Check if last_activity is already timezone-aware
+            if last_activity.tzinfo is None:
+                # If not, localize it
+                last_activity = last_activity.replace(tzinfo=timezone.utc)
+
+            now = datetime.now(timezone.utc)  # Get current UTC time
 
             if now - last_activity > app.permanent_session_lifetime:
                 # Session has expired, force the user to log in again
