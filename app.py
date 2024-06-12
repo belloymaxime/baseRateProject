@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session
+import os
 import json 
 from math import exp
 
 
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 
 # Dummy database of base rates
 
@@ -44,160 +46,184 @@ def find_valuation_index(i):
     
     return None  # If i doesn't fit in any range, return None
 
+# Hardcoded credentials
+PASSWORD = "menloSourcing"
+
+
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    if 'authenticated' in session and session['authenticated']:
+        if request.method == 'POST':
+            roundVal = request.form['round']
+            lastroundvaluation = request.form['lastroundvaluation'] 
+            equity = request.form['equity'] 
+            sector = request.form['sector']
+            if lastroundvaluation == '':
+                lastroundvaluation = 0
+            if equity == '':
+                equity = 0
+            try:
+                lastroundvaluation = int(lastroundvaluation)
+            except:
+                lastroundvaluation = 0
+            try:
+                equity = int(equity)
+            except:
+                equity = 0
+            
+
+            if(lastroundvaluation == 0 or roundVal == "Private Equity" or roundVal == "Pre Seed"):
+
+                base_rate_next_round = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Next round %', 0)) if base_rates[sector][roundVal].get('Next round %', 0) != "N/A" else "N/A"
+                base_rate_exit = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit round %', 0)) if base_rates[sector][roundVal].get('Exit round %', 0) != "N/A" else "N/A"
+                exit_lt_200M = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit < 200M %', 0)) if base_rates[sector][roundVal].get('Exit < 200M %', 0) != "N/A" else "N/A"
+                exit_200M_500M = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit 200M-500M %', 0)) if base_rates[sector][roundVal].get('Exit 200M-500M %', 0) != "N/A" else "N/A"
+                exit_500M_1B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit 500M-1B %', 0)) if base_rates[sector][roundVal].get('Exit 500M-1B %', 0) != "N/A" else "N/A"
+                exit_1B_2B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit 1B-2B %', 0)) if base_rates[sector][roundVal].get('Exit 1B-2B %', 0) != "N/A" else "N/A"
+                exit_2B_5B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit 2B-5B %', 0)) if base_rates[sector][roundVal].get('Exit 2B-5B %', 0) != "N/A" else "N/A"
+                exit_5B_10B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit 5B-10B %', 0)) if base_rates[sector][roundVal].get('Exit 5B-10B %', 0) != "N/A" else "N/A"
+                exit_gt_10B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit > 10 B %', 0)) if base_rates[sector][roundVal].get('Exit > 10 B %', 0) != "N/A" else "N/A"
+                exit_no_valuation = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit no Valuation %', 0)) if base_rates[sector][roundVal].get('Exit no Valuation %', 0) != "N/A" else "N/A"
+                median_headcount = str(round(int(base_rates[sector][roundVal].get('Median headcount', 0)))) if base_rates[sector][roundVal].get('Median headcount', 0) != "N/A" else "N/A"
+                estimated_arr_per_fte = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Estimated ARR per FTE from Headcount + ICONIQ report', 0)))) if base_rates[sector][roundVal].get('Estimated ARR per FTE from Headcount + ICONIQ report', 0) != "N/A" else "N/A"
+                estimated_arr = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Estimated ARR', 0)))) if base_rates[sector][roundVal].get('Estimated ARR', 0) != "N/A" else "N/A"
+                average_funding = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Average funding', 0)))) if base_rates[sector][roundVal].get('Average funding', 0) != "N/A" else "N/A"
+                median_funding = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Median funding', 0)))) if base_rates[sector][roundVal].get('Median funding', 0) != "N/A" else "N/A"
+                avg_time_to_next_round_typical = str(round(int(base_rates[sector][roundVal].get('Average time to next round in typical series (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Average time to next round in typical series (days)', 0) != "N/A" else "N/A"
+                median_time_to_next_round_typical = str(round(int(base_rates[sector][roundVal].get('Median time to next round in typical series(days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to next round in typical series(days)', 0) != "N/A" else "N/A"
+                avg_time_to_any_next_round = str(round(int(base_rates[sector][roundVal].get('Average time to any next round (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Average time to any next round (days)', 0) != "N/A" else "N/A"
+                median_time_to_any_next_round = str(round(int(base_rates[sector][roundVal].get('Median time to any next round (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to any next round (days)', 0) != "N/A" else "N/A"
+                avg_time_to_exit = str(round(int(base_rates[sector][roundVal].get('average time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('average time to exit (days)', 0) != "N/A" else "N/A"
+                median_time_to_exit = str(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
+                expected_value_of_outcome = round(int(base_rates[sector][roundVal].get('Expected value of outcome', 0))) if base_rates[sector][roundVal].get('Expected value of outcome', 0) != "N/A" else "N/A"
+                pARR1 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 0 and 2', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR2 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 2 and 5', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR3 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 5 and 10', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR4 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 10 and 20', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR5 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 20 and 50', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR6 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 50 and 100', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR7 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 100 and 500', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR8 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 505 and 1000', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR9 = "{:.2f}%".format(100 * arr[roundVal].get("ARR between 1000 and inf", 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+
+
+                meanExit = int(equity)*expected_value_of_outcome/100
+                try:
+                    prob_gain_0_500K = "{:.2f}%".format(100 *(1-exp(-(1/meanExit)*500000)) * base_rates[sector][roundVal].get('Exit round %', 0))
+                    prob_gain_500K_1M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*1000000)) - (1-exp(-(1/meanExit)*500000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+                    prob_gain_1_5M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*5000000)) - (1-exp(-(1/meanExit)*1000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+                    prob_gain_5M_10M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*10000000)) - (1-exp(-(1/meanExit)*5000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+                    prob_gain_10M_plus = "{:.2f}%".format(100 *(1 - (1-exp(-(1/meanExit)*10000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+                except:
+                    prob_gain_0_500K = 0
+                    prob_gain_500K_1M = 0
+                    prob_gain_1_5M = 0
+                    prob_gain_5M_10M = 0
+                    prob_gain_10M_plus = 0    
+
+
+
+                # Inside the index() function
+                return render_template('result.html', round=roundVal, lastroundvaluation=lastroundvaluation, equity="{:.2f}%".format(int(equity)), sector=sector, base_rate_next_round=base_rate_next_round, base_rate_exit=base_rate_exit, exit_lt_200M=exit_lt_200M, exit_200M_500M=exit_200M_500M, exit_500M_1B=exit_500M_1B, exit_1B_2B=exit_1B_2B, exit_2B_5B=exit_2B_5B, exit_5B_10B=exit_5B_10B, exit_gt_10B=exit_gt_10B, exit_no_valuation=exit_no_valuation, median_headcount=median_headcount, estimated_arr_per_fte=estimated_arr_per_fte, estimated_arr=estimated_arr, average_funding=average_funding, median_funding=median_funding, avg_time_to_next_round_typical=avg_time_to_next_round_typical, median_time_to_next_round_typical=median_time_to_next_round_typical, avg_time_to_any_next_round=avg_time_to_any_next_round, median_time_to_any_next_round=median_time_to_any_next_round, avg_time_to_exit=avg_time_to_exit, median_time_to_exit=median_time_to_exit, expected_value_of_outcome= "${:,.0f}".format(round(expected_value_of_outcome*int(equity)/100))
+                                    , prob_gain_0_500K=prob_gain_0_500K, prob_gain_500K_1M=prob_gain_500K_1M, prob_gain_1_5M=prob_gain_1_5M, prob_gain_5M_10M=prob_gain_5M_10M, prob_gain_10M_plus=prob_gain_10M_plus,
+                                    pARR1=pARR1, pARR2=pARR2, pARR3=pARR3, pARR4=pARR4, pARR5=pARR5, pARR6=pARR6, pARR7=pARR7, pARR8=pARR8, pARR9=pARR9 )
+
+
+            else:
+
+                valIndex = find_valuation_index(lastroundvaluation)
+
+                next1 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("0-10m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("0-10m", None) is not None else "N/A"
+                next2 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("10m-25m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("10m-25m", None) is not None else "N/A"
+                next3 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("25m-50m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("25m-50m", None) is not None else "N/A"
+                next4 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("50m-75m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("50m-75m", None) is not None else "N/A"
+                next5 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("75m-150m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("75m-150m", None) is not None else "N/A"
+                next6 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("150m-300m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("150m-300m", None) is not None else "N/A"
+                next7 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("300m-500m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("300m-500m", None) is not None else "N/A"
+                next8 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("500m-750m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("500m-750m", None) is not None else "N/A"
+                next9 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("750m-1b", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("750m-1b", None) is not None else "N/A"
+                next10 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("1b-2b", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("1b-2b", None) is not None else "N/A"
+                next11 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("2b-5b", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("2b-5b", None) is not None else "N/A"
+                next12 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("5b+", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("5b+", None) is not None else "N/A"
+
+                exit1 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("0-200m", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("0-200m", None) is not None else "N/A"
+                exit2 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("200m-500m", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("200m-500m", None) is not None else "N/A"
+                exit3 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("500m-1b", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("500m-1b", None) is not None else "N/A"
+                exit4 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("1b-2b", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("1b-2b", None) is not None else "N/A"
+                exit5 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("2b-5b", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("2b-5b", None) is not None else "N/A"
+                exit6 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("5b+", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("5b+", None) is not None else "N/A"
+
+                median_headcount = str(round(int(base_rates[sector][roundVal].get('Median headcount', 0)))) if base_rates[sector][roundVal].get('Median headcount', 0) != "N/A" else "N/A"
+                estimated_arr_per_fte = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Estimated ARR per FTE from Headcount + ICONIQ report', 0)))) if base_rates[sector][roundVal].get('Estimated ARR per FTE from Headcount + ICONIQ report', 0) != "N/A" else "N/A"
+                estimated_arr = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Estimated ARR', 0)))) if base_rates[sector][roundVal].get('Estimated ARR', 0) != "N/A" else "N/A"
+                average_funding = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Average funding', 0)))) if base_rates[sector][roundVal].get('Average funding', 0) != "N/A" else "N/A"
+                median_funding = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Median funding', 0)))) if base_rates[sector][roundVal].get('Median funding', 0) != "N/A" else "N/A"
+                avg_time_to_next_round_typical = str(round(int(base_rates[sector][roundVal].get('Average time to next round in typical series (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Average time to next round in typical series (days)', 0) != "N/A" else "N/A"
+                median_time_to_next_round_typical = str(round(int(base_rates[sector][roundVal].get('Median time to next round in typical series(days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to next round in typical series(days)', 0) != "N/A" else "N/A"
+                avg_time_to_any_next_round = str(round(int(base_rates[sector][roundVal].get('Average time to any next round (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Average time to any next round (days)', 0) != "N/A" else "N/A"
+                median_time_to_any_next_round = str(round(int(base_rates[sector][roundVal].get('Median time to any next round (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to any next round (days)', 0) != "N/A" else "N/A"
+                avg_time_to_exit = str(round(int(base_rates[sector][roundVal].get('average time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('average time to exit (days)', 0) != "N/A" else "N/A"
+                median_time_to_exit = str(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
+                expected_value_of_outcome = round(int(base_rates[sector][roundVal].get('Expected value of outcome', 0))) if base_rates[sector][roundVal].get('Expected value of outcome', 0) != "N/A" else "N/A"
+                pARR1 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 0 and 2', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR2 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 2 and 5', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR3 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 5 and 10', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR4 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 10 and 20', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR5 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 20 and 50', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR6 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 50 and 100', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR7 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 100 and 500', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR8 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 505 and 1000', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                pARR9 = "{:.2f}%".format(100 * arr[roundVal].get("ARR between 1000 and inf", 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+
+
+                meanExit = int(equity)*expected_value_of_outcome/100
+                try:
+                    prob_gain_0_500K = "{:.2f}%".format(100 *(1-exp(-(1/meanExit)*500000)) * base_rates[sector][roundVal].get('Exit round %', 0))
+                    prob_gain_500K_1M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*1000000)) - (1-exp(-(1/meanExit)*500000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+                    prob_gain_1_5M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*5000000)) - (1-exp(-(1/meanExit)*1000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+                    prob_gain_5M_10M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*10000000)) - (1-exp(-(1/meanExit)*5000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+                    prob_gain_10M_plus = "{:.2f}%".format(100 *(1 - (1-exp(-(1/meanExit)*10000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
+                except:
+                    prob_gain_0_500K = 0
+                    prob_gain_500K_1M = 0
+                    prob_gain_1_5M = 0
+                    prob_gain_5M_10M = 0
+                    prob_gain_10M_plus = 0    
+
+
+
+                # Inside the index() function
+                return render_template('resultPB.html', round=roundVal, lastroundvaluation=lastroundvaluation, equity="{:.2f}%".format(int(equity)), sector=sector, median_headcount=median_headcount, estimated_arr_per_fte=estimated_arr_per_fte, estimated_arr=estimated_arr, average_funding=average_funding, median_funding=median_funding, avg_time_to_next_round_typical=avg_time_to_next_round_typical, median_time_to_next_round_typical=median_time_to_next_round_typical, avg_time_to_any_next_round=avg_time_to_any_next_round, median_time_to_any_next_round=median_time_to_any_next_round, avg_time_to_exit=avg_time_to_exit, median_time_to_exit=median_time_to_exit, expected_value_of_outcome= "${:,.0f}".format(round(expected_value_of_outcome*int(equity)/100))
+                                    , prob_gain_0_500K=prob_gain_0_500K, prob_gain_500K_1M=prob_gain_500K_1M, prob_gain_1_5M=prob_gain_1_5M, prob_gain_5M_10M=prob_gain_5M_10M, prob_gain_10M_plus=prob_gain_10M_plus,
+                                    pARR1=pARR1, pARR2=pARR2, pARR3=pARR3, pARR4=pARR4, pARR5=pARR5, pARR6=pARR6, pARR7=pARR7, pARR8=pARR8, pARR9=pARR9,
+                                    next1=next1, next2=next2, next3=next3, next4=next4, next5=next5, next6=next6, next7=next7, next8=next8, next9=next9, next10=next10, next11=next11, next12=next12,
+                                    exit1=exit1, exit2=exit2, exit3=exit3, exit4=exit4, exit5=exit5, exit6=exit6 )
+
+
+
+
+        return render_template('index.html')
+    else:
+        # User is not authenticated, redirect to the login page
+        return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
     if request.method == 'POST':
-        roundVal = request.form['round']
-        lastroundvaluation = request.form['lastroundvaluation'] 
-        equity = request.form['equity'] 
-        sector = request.form['sector']
-        if lastroundvaluation == '':
-            lastroundvaluation = 0
-        if equity == '':
-            equity = 0
-        try:
-            lastroundvaluation = int(lastroundvaluation)
-        except:
-            lastroundvaluation = 0
-        try:
-            equity = int(equity)
-        except:
-            equity = 0
-        
-
-        if(lastroundvaluation == 0 or roundVal == "Private Equity" or roundVal == "Pre Seed"):
-
-            base_rate_next_round = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Next round %', 0)) if base_rates[sector][roundVal].get('Next round %', 0) != "N/A" else "N/A"
-            base_rate_exit = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit round %', 0)) if base_rates[sector][roundVal].get('Exit round %', 0) != "N/A" else "N/A"
-            exit_lt_200M = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit < 200M %', 0)) if base_rates[sector][roundVal].get('Exit < 200M %', 0) != "N/A" else "N/A"
-            exit_200M_500M = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit 200M-500M %', 0)) if base_rates[sector][roundVal].get('Exit 200M-500M %', 0) != "N/A" else "N/A"
-            exit_500M_1B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit 500M-1B %', 0)) if base_rates[sector][roundVal].get('Exit 500M-1B %', 0) != "N/A" else "N/A"
-            exit_1B_2B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit 1B-2B %', 0)) if base_rates[sector][roundVal].get('Exit 1B-2B %', 0) != "N/A" else "N/A"
-            exit_2B_5B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit 2B-5B %', 0)) if base_rates[sector][roundVal].get('Exit 2B-5B %', 0) != "N/A" else "N/A"
-            exit_5B_10B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit 5B-10B %', 0)) if base_rates[sector][roundVal].get('Exit 5B-10B %', 0) != "N/A" else "N/A"
-            exit_gt_10B = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit > 10 B %', 0)) if base_rates[sector][roundVal].get('Exit > 10 B %', 0) != "N/A" else "N/A"
-            exit_no_valuation = "{:.2f}%".format(100 * base_rates[sector][roundVal].get('Exit no Valuation %', 0)) if base_rates[sector][roundVal].get('Exit no Valuation %', 0) != "N/A" else "N/A"
-            median_headcount = str(round(int(base_rates[sector][roundVal].get('Median headcount', 0)))) if base_rates[sector][roundVal].get('Median headcount', 0) != "N/A" else "N/A"
-            estimated_arr_per_fte = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Estimated ARR per FTE from Headcount + ICONIQ report', 0)))) if base_rates[sector][roundVal].get('Estimated ARR per FTE from Headcount + ICONIQ report', 0) != "N/A" else "N/A"
-            estimated_arr = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Estimated ARR', 0)))) if base_rates[sector][roundVal].get('Estimated ARR', 0) != "N/A" else "N/A"
-            average_funding = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Average funding', 0)))) if base_rates[sector][roundVal].get('Average funding', 0) != "N/A" else "N/A"
-            median_funding = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Median funding', 0)))) if base_rates[sector][roundVal].get('Median funding', 0) != "N/A" else "N/A"
-            avg_time_to_next_round_typical = str(round(int(base_rates[sector][roundVal].get('Average time to next round in typical series (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Average time to next round in typical series (days)', 0) != "N/A" else "N/A"
-            median_time_to_next_round_typical = str(round(int(base_rates[sector][roundVal].get('Median time to next round in typical series(days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to next round in typical series(days)', 0) != "N/A" else "N/A"
-            avg_time_to_any_next_round = str(round(int(base_rates[sector][roundVal].get('Average time to any next round (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Average time to any next round (days)', 0) != "N/A" else "N/A"
-            median_time_to_any_next_round = str(round(int(base_rates[sector][roundVal].get('Median time to any next round (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to any next round (days)', 0) != "N/A" else "N/A"
-            avg_time_to_exit = str(round(int(base_rates[sector][roundVal].get('average time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('average time to exit (days)', 0) != "N/A" else "N/A"
-            median_time_to_exit = str(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
-            expected_value_of_outcome = round(int(base_rates[sector][roundVal].get('Expected value of outcome', 0))) if base_rates[sector][roundVal].get('Expected value of outcome', 0) != "N/A" else "N/A"
-            pARR1 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 0 and 2', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR2 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 2 and 5', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR3 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 5 and 10', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR4 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 10 and 20', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR5 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 20 and 50', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR6 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 50 and 100', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR7 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 100 and 500', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR8 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 505 and 1000', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR9 = "{:.2f}%".format(100 * arr[roundVal].get("ARR between 1000 and inf", 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-
-
-            meanExit = int(equity)*expected_value_of_outcome/100
-            try:
-                prob_gain_0_500K = "{:.2f}%".format(100 *(1-exp(-(1/meanExit)*500000)) * base_rates[sector][roundVal].get('Exit round %', 0))
-                prob_gain_500K_1M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*1000000)) - (1-exp(-(1/meanExit)*500000))) * base_rates[sector][roundVal].get('Exit round %', 0))
-                prob_gain_1_5M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*5000000)) - (1-exp(-(1/meanExit)*1000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
-                prob_gain_5M_10M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*10000000)) - (1-exp(-(1/meanExit)*5000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
-                prob_gain_10M_plus = "{:.2f}%".format(100 *(1 - (1-exp(-(1/meanExit)*10000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
-            except:
-                prob_gain_0_500K = 0
-                prob_gain_500K_1M = 0
-                prob_gain_1_5M = 0
-                prob_gain_5M_10M = 0
-                prob_gain_10M_plus = 0    
-
-
-
-            # Inside the index() function
-            return render_template('result.html', round=roundVal, lastroundvaluation=lastroundvaluation, equity="{:.2f}%".format(int(equity)), sector=sector, base_rate_next_round=base_rate_next_round, base_rate_exit=base_rate_exit, exit_lt_200M=exit_lt_200M, exit_200M_500M=exit_200M_500M, exit_500M_1B=exit_500M_1B, exit_1B_2B=exit_1B_2B, exit_2B_5B=exit_2B_5B, exit_5B_10B=exit_5B_10B, exit_gt_10B=exit_gt_10B, exit_no_valuation=exit_no_valuation, median_headcount=median_headcount, estimated_arr_per_fte=estimated_arr_per_fte, estimated_arr=estimated_arr, average_funding=average_funding, median_funding=median_funding, avg_time_to_next_round_typical=avg_time_to_next_round_typical, median_time_to_next_round_typical=median_time_to_next_round_typical, avg_time_to_any_next_round=avg_time_to_any_next_round, median_time_to_any_next_round=median_time_to_any_next_round, avg_time_to_exit=avg_time_to_exit, median_time_to_exit=median_time_to_exit, expected_value_of_outcome= "${:,.0f}".format(round(expected_value_of_outcome*int(equity)/100))
-                                , prob_gain_0_500K=prob_gain_0_500K, prob_gain_500K_1M=prob_gain_500K_1M, prob_gain_1_5M=prob_gain_1_5M, prob_gain_5M_10M=prob_gain_5M_10M, prob_gain_10M_plus=prob_gain_10M_plus,
-                                pARR1=pARR1, pARR2=pARR2, pARR3=pARR3, pARR4=pARR4, pARR5=pARR5, pARR6=pARR6, pARR7=pARR7, pARR8=pARR8, pARR9=pARR9 )
-
-
+        username = request.form['username']
+        password = request.form['password']
+        if password == PASSWORD:
+            # Authentication successful
+            session['authenticated'] = True
+            return redirect(url_for('index'))
         else:
+            # Authentication failed
+            error = "Invalid username or password"
+            return render_template('login.html', error=error)
+    return render_template('login.html')
 
-            valIndex = find_valuation_index(lastroundvaluation)
-
-            next1 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("0-10m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("0-10m", None) is not None else "N/A"
-            next2 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("10m-25m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("10m-25m", None) is not None else "N/A"
-            next3 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("25m-50m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("25m-50m", None) is not None else "N/A"
-            next4 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("50m-75m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("50m-75m", None) is not None else "N/A"
-            next5 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("75m-150m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("75m-150m", None) is not None else "N/A"
-            next6 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("150m-300m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("150m-300m", None) is not None else "N/A"
-            next7 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("300m-500m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("300m-500m", None) is not None else "N/A"
-            next8 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("500m-750m", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("500m-750m", None) is not None else "N/A"
-            next9 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("750m-1b", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("750m-1b", None) is not None else "N/A"
-            next10 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("1b-2b", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("1b-2b", None) is not None else "N/A"
-            next11 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("2b-5b", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("2b-5b", None) is not None else "N/A"
-            next12 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Next Round:"].get("5b+", 0)) if pb[roundVal][valuations[valIndex]]["Next Round:"].get("5b+", None) is not None else "N/A"
-
-            exit1 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("0-200m", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("0-200m", None) is not None else "N/A"
-            exit2 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("200m-500m", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("200m-500m", None) is not None else "N/A"
-            exit3 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("500m-1b", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("500m-1b", None) is not None else "N/A"
-            exit4 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("1b-2b", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("1b-2b", None) is not None else "N/A"
-            exit5 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("2b-5b", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("2b-5b", None) is not None else "N/A"
-            exit6 = "{:.2f}%".format(100 * pb[roundVal][valuations[valIndex]]["Exit"].get("5b+", 0)) if pb[roundVal][valuations[valIndex]]["Exit"].get("5b+", None) is not None else "N/A"
-
-            median_headcount = str(round(int(base_rates[sector][roundVal].get('Median headcount', 0)))) if base_rates[sector][roundVal].get('Median headcount', 0) != "N/A" else "N/A"
-            estimated_arr_per_fte = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Estimated ARR per FTE from Headcount + ICONIQ report', 0)))) if base_rates[sector][roundVal].get('Estimated ARR per FTE from Headcount + ICONIQ report', 0) != "N/A" else "N/A"
-            estimated_arr = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Estimated ARR', 0)))) if base_rates[sector][roundVal].get('Estimated ARR', 0) != "N/A" else "N/A"
-            average_funding = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Average funding', 0)))) if base_rates[sector][roundVal].get('Average funding', 0) != "N/A" else "N/A"
-            median_funding = "${:,.0f}".format(round(int(base_rates[sector][roundVal].get('Median funding', 0)))) if base_rates[sector][roundVal].get('Median funding', 0) != "N/A" else "N/A"
-            avg_time_to_next_round_typical = str(round(int(base_rates[sector][roundVal].get('Average time to next round in typical series (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Average time to next round in typical series (days)', 0) != "N/A" else "N/A"
-            median_time_to_next_round_typical = str(round(int(base_rates[sector][roundVal].get('Median time to next round in typical series(days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to next round in typical series(days)', 0) != "N/A" else "N/A"
-            avg_time_to_any_next_round = str(round(int(base_rates[sector][roundVal].get('Average time to any next round (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Average time to any next round (days)', 0) != "N/A" else "N/A"
-            median_time_to_any_next_round = str(round(int(base_rates[sector][roundVal].get('Median time to any next round (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to any next round (days)', 0) != "N/A" else "N/A"
-            avg_time_to_exit = str(round(int(base_rates[sector][roundVal].get('average time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('average time to exit (days)', 0) != "N/A" else "N/A"
-            median_time_to_exit = str(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
-            expected_value_of_outcome = round(int(base_rates[sector][roundVal].get('Expected value of outcome', 0))) if base_rates[sector][roundVal].get('Expected value of outcome', 0) != "N/A" else "N/A"
-            pARR1 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 0 and 2', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR2 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 2 and 5', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR3 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 5 and 10', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR4 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 10 and 20', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR5 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 20 and 50', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR6 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 50 and 100', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR7 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 100 and 500', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR8 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 505 and 1000', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-            pARR9 = "{:.2f}%".format(100 * arr[roundVal].get("ARR between 1000 and inf", 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-
-
-            meanExit = int(equity)*expected_value_of_outcome/100
-            try:
-                prob_gain_0_500K = "{:.2f}%".format(100 *(1-exp(-(1/meanExit)*500000)) * base_rates[sector][roundVal].get('Exit round %', 0))
-                prob_gain_500K_1M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*1000000)) - (1-exp(-(1/meanExit)*500000))) * base_rates[sector][roundVal].get('Exit round %', 0))
-                prob_gain_1_5M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*5000000)) - (1-exp(-(1/meanExit)*1000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
-                prob_gain_5M_10M = "{:.2f}%".format(100 *((1-exp(-(1/meanExit)*10000000)) - (1-exp(-(1/meanExit)*5000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
-                prob_gain_10M_plus = "{:.2f}%".format(100 *(1 - (1-exp(-(1/meanExit)*10000000))) * base_rates[sector][roundVal].get('Exit round %', 0))
-            except:
-                prob_gain_0_500K = 0
-                prob_gain_500K_1M = 0
-                prob_gain_1_5M = 0
-                prob_gain_5M_10M = 0
-                prob_gain_10M_plus = 0    
-
-
-
-            # Inside the index() function
-            return render_template('resultPB.html', round=roundVal, lastroundvaluation=lastroundvaluation, equity="{:.2f}%".format(int(equity)), sector=sector, median_headcount=median_headcount, estimated_arr_per_fte=estimated_arr_per_fte, estimated_arr=estimated_arr, average_funding=average_funding, median_funding=median_funding, avg_time_to_next_round_typical=avg_time_to_next_round_typical, median_time_to_next_round_typical=median_time_to_next_round_typical, avg_time_to_any_next_round=avg_time_to_any_next_round, median_time_to_any_next_round=median_time_to_any_next_round, avg_time_to_exit=avg_time_to_exit, median_time_to_exit=median_time_to_exit, expected_value_of_outcome= "${:,.0f}".format(round(expected_value_of_outcome*int(equity)/100))
-                                , prob_gain_0_500K=prob_gain_0_500K, prob_gain_500K_1M=prob_gain_500K_1M, prob_gain_1_5M=prob_gain_1_5M, prob_gain_5M_10M=prob_gain_5M_10M, prob_gain_10M_plus=prob_gain_10M_plus,
-                                pARR1=pARR1, pARR2=pARR2, pARR3=pARR3, pARR4=pARR4, pARR5=pARR5, pARR6=pARR6, pARR7=pARR7, pARR8=pARR8, pARR9=pARR9,
-                                 next1=next1, next2=next2, next3=next3, next4=next4, next5=next5, next6=next6, next7=next7, next8=next8, next9=next9, next10=next10, next11=next11, next12=next12,
-                                 exit1=exit1, exit2=exit2, exit3=exit3, exit4=exit4, exit5=exit5, exit6=exit6 )
-
-
-
-
-    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",port=8080, debug=True)
