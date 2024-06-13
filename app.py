@@ -16,11 +16,13 @@ app.permanent_session_lifetime = timedelta(minutes=10)  # Session timeout durati
 with open("jsonVals.json", 'r') as json_file:
     base_rates = json.load(json_file)
 
-
+'''
 with open("smoothed_probabilities.json", 'r') as json_file:
     arr = json.load(json_file)
 
 float_keys = [float(key) for key in arr.keys()]
+
+'''
 
 with open("PitchBook.json", 'r') as json_file:
     pb = json.load(json_file)
@@ -80,10 +82,18 @@ def index():
             roundVal = request.form['round']
             lastroundvaluation = request.form['lastroundvaluation'] 
             equity = request.form['equity'] 
-            arrInput = request.form['arrinput']
             sector = request.form['sector']
+            '''
+            arrInput = request.form['arrinput']
             if arrInput == '':
                 arrInput = 0
+            
+            try:
+                arrInput = int(arrInput)
+            except:
+                arrInput = 0
+            '''
+
             if lastroundvaluation == '':
                 lastroundvaluation = 0
             if equity == '':
@@ -96,10 +106,7 @@ def index():
                 equity = int(equity)
             except:
                 equity = 0
-            try:
-                arrInput = int(arrInput)
-            except:
-                arrInput = 0
+
             
 
             if(lastroundvaluation == 0 or roundVal == "Private Equity" or roundVal == "Pre Seed"):
@@ -127,6 +134,7 @@ def index():
                 median_time_to_exit = str(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
                 expected_value_of_outcome = round(int(base_rates[sector][roundVal].get('Expected value of outcome', 0))) if base_rates[sector][roundVal].get('Expected value of outcome', 0) != "N/A" else "N/A"
 
+                '''
                 closest_key = None
                 for key in sorted(float_keys):
                     closest_key = key
@@ -145,7 +153,16 @@ def index():
                 pARR7 = "{:.2f}%".format(100 * probs.get('prob_100_500', 0)) if probs.get('prob_100_500', None) is not None else "N/A"
                 pARR8 = "{:.2f}%".format(100 * probs.get('prob_500_1000', 0)) if probs.get('prob_500_1000', None) is not None else "N/A"
                 pARR9 = "{:.2f}%".format(100 * probs.get("prob_1000_inf", 0)) if probs.get('prob_1000_inf', None) is not None else "N/A"
+                '''
 
+                pARR1 = None
+                pARR2 = None
+                pARR3 = None
+                pARR4 = None
+                pARR5 = None
+                pARR6 = None
+                pARR7 = None
+                pARR8 = None
 
                 meanExit = int(equity)*expected_value_of_outcome/100
                 try:
@@ -206,6 +223,7 @@ def index():
                 median_time_to_exit = str(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
                 expected_value_of_outcome = round(int(base_rates[sector][roundVal].get('Expected value of outcome', 0))) if base_rates[sector][roundVal].get('Expected value of outcome', 0) != "N/A" else "N/A"
                 
+                '''
                 closest_key = None
                 for key in sorted(float_keys):
                     closest_key = key
@@ -223,6 +241,18 @@ def index():
                 pARR6 = "{:.2f}%".format(100 * probs.get('prob_50_100', 0)) if probs.get('prob_50_100', None) is not None else "N/A"
                 pARR7 = "{:.2f}%".format(100 * probs.get('prob_100_500', 0)) if probs.get('prob_100_500', None) is not None else "N/A"
                 pARR8 = "{:.2f}%".format(100 * probs.get('prob_500_1000', 0)) if probs.get('prob_500_1000', None) is not None else "N/A"
+                '''
+
+
+                pARR1 = None
+                pARR2 = None
+                pARR3 = None
+                pARR4 = None
+                pARR5 = None
+                pARR6 = None
+                pARR7 = None
+                pARR8 = None
+                pARR9 = None
 
                 meanExit = int(equity)*expected_value_of_outcome/100
                 try:
