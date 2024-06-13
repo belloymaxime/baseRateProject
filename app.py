@@ -155,6 +155,8 @@ def index():
                 pARR9 = "{:.2f}%".format(100 * probs.get("prob_1000_inf", 0)) if probs.get('prob_1000_inf', None) is not None else "N/A"
                 '''
 
+
+                #these lines for temp only
                 pARR1 = None
                 pARR2 = None
                 pARR3 = None
@@ -163,6 +165,8 @@ def index():
                 pARR6 = None
                 pARR7 = None
                 pARR8 = None
+                pARR9 = None
+                arrInput = 0
 
                 meanExit = int(equity)*expected_value_of_outcome/100
                 try:
@@ -243,7 +247,7 @@ def index():
                 pARR8 = "{:.2f}%".format(100 * probs.get('prob_500_1000', 0)) if probs.get('prob_500_1000', None) is not None else "N/A"
                 '''
 
-
+                #these lines for temp only
                 pARR1 = None
                 pARR2 = None
                 pARR3 = None
@@ -253,6 +257,7 @@ def index():
                 pARR7 = None
                 pARR8 = None
                 pARR9 = None
+                arrInput = 0
 
                 meanExit = int(equity)*expected_value_of_outcome/100
                 try:
