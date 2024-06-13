@@ -17,8 +17,10 @@ with open("jsonVals.json", 'r') as json_file:
     base_rates = json.load(json_file)
 
 
-with open("ARR.json", 'r') as json_file:
+with open("smoothed_probabilities.json", 'r') as json_file:
     arr = json.load(json_file)
+
+float_keys = [float(key) for key in arr.keys()]
 
 with open("PitchBook.json", 'r') as json_file:
     pb = json.load(json_file)
@@ -78,7 +80,10 @@ def index():
             roundVal = request.form['round']
             lastroundvaluation = request.form['lastroundvaluation'] 
             equity = request.form['equity'] 
+            arrInput = request.form['arrinput']
             sector = request.form['sector']
+            if arrInput == '':
+                arrInput = 0
             if lastroundvaluation == '':
                 lastroundvaluation = 0
             if equity == '':
@@ -91,6 +96,10 @@ def index():
                 equity = int(equity)
             except:
                 equity = 0
+            try:
+                arrInput = int(arrInput)
+            except:
+                arrInput = 0
             
 
             if(lastroundvaluation == 0 or roundVal == "Private Equity" or roundVal == "Pre Seed"):
@@ -117,15 +126,25 @@ def index():
                 avg_time_to_exit = str(round(int(base_rates[sector][roundVal].get('average time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('average time to exit (days)', 0) != "N/A" else "N/A"
                 median_time_to_exit = str(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
                 expected_value_of_outcome = round(int(base_rates[sector][roundVal].get('Expected value of outcome', 0))) if base_rates[sector][roundVal].get('Expected value of outcome', 0) != "N/A" else "N/A"
-                pARR1 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 0 and 2', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR2 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 2 and 5', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR3 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 5 and 10', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR4 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 10 and 20', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR5 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 20 and 50', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR6 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 50 and 100', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR7 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 100 and 500', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR8 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 505 and 1000', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR9 = "{:.2f}%".format(100 * arr[roundVal].get("ARR between 1000 and inf", 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+
+                closest_key = None
+                for key in sorted(float_keys):
+                    closest_key = key
+                    if key >= arrInput/1000000:
+                        break
+                if(closest_key is None):
+                    closest_key = sorted(float_keys)[-1]
+
+                probs = arr[str(closest_key)]
+                pARR1 = "{:.2f}%".format(100 * probs.get('prob_0_2', 0)) if probs.get('prob_0_2', None) is not None else "N/A"
+                pARR2 = "{:.2f}%".format(100 * probs.get('prob_2_5', 0)) if probs.get('prob_2_5', None) is not None else "N/A"
+                pARR3 = "{:.2f}%".format(100 * probs.get('prob_5_10', 0)) if probs.get('prob_5_10', None) is not None else "N/A"
+                pARR4 = "{:.2f}%".format(100 * probs.get('prob_10_20', 0)) if probs.get('prob_10_20', None) is not None else "N/A"
+                pARR5 = "{:.2f}%".format(100 * probs.get('prob_20_50', 0)) if probs.get('prob_20_50', None) is not None else "N/A"
+                pARR6 = "{:.2f}%".format(100 * probs.get('prob_50_100', 0)) if probs.get('prob_50_100', None) is not None else "N/A"
+                pARR7 = "{:.2f}%".format(100 * probs.get('prob_100_500', 0)) if probs.get('prob_100_500', None) is not None else "N/A"
+                pARR8 = "{:.2f}%".format(100 * probs.get('prob_500_1000', 0)) if probs.get('prob_500_1000', None) is not None else "N/A"
+                pARR9 = "{:.2f}%".format(100 * probs.get("prob_1000_inf", 0)) if probs.get('prob_1000_inf', None) is not None else "N/A"
 
 
                 meanExit = int(equity)*expected_value_of_outcome/100
@@ -145,7 +164,7 @@ def index():
 
 
                 # Inside the index() function
-                return render_template('result.html', round=roundVal, lastroundvaluation=lastroundvaluation, equity="{:.2f}%".format(int(equity)), sector=sector, base_rate_next_round=base_rate_next_round, base_rate_exit=base_rate_exit, exit_lt_200M=exit_lt_200M, exit_200M_500M=exit_200M_500M, exit_500M_1B=exit_500M_1B, exit_1B_2B=exit_1B_2B, exit_2B_5B=exit_2B_5B, exit_5B_10B=exit_5B_10B, exit_gt_10B=exit_gt_10B, exit_no_valuation=exit_no_valuation, median_headcount=median_headcount, estimated_arr_per_fte=estimated_arr_per_fte, estimated_arr=estimated_arr, average_funding=average_funding, median_funding=median_funding, avg_time_to_next_round_typical=avg_time_to_next_round_typical, median_time_to_next_round_typical=median_time_to_next_round_typical, avg_time_to_any_next_round=avg_time_to_any_next_round, median_time_to_any_next_round=median_time_to_any_next_round, avg_time_to_exit=avg_time_to_exit, median_time_to_exit=median_time_to_exit, expected_value_of_outcome= "${:,.0f}".format(round(expected_value_of_outcome*int(equity)/100))
+                return render_template('result.html', round=roundVal, lastroundvaluation=lastroundvaluation, inputARR = arrInput, equity="{:.2f}%".format(int(equity)), sector=sector, base_rate_next_round=base_rate_next_round, base_rate_exit=base_rate_exit, exit_lt_200M=exit_lt_200M, exit_200M_500M=exit_200M_500M, exit_500M_1B=exit_500M_1B, exit_1B_2B=exit_1B_2B, exit_2B_5B=exit_2B_5B, exit_5B_10B=exit_5B_10B, exit_gt_10B=exit_gt_10B, exit_no_valuation=exit_no_valuation, median_headcount=median_headcount, estimated_arr_per_fte=estimated_arr_per_fte, estimated_arr=estimated_arr, average_funding=average_funding, median_funding=median_funding, avg_time_to_next_round_typical=avg_time_to_next_round_typical, median_time_to_next_round_typical=median_time_to_next_round_typical, avg_time_to_any_next_round=avg_time_to_any_next_round, median_time_to_any_next_round=median_time_to_any_next_round, avg_time_to_exit=avg_time_to_exit, median_time_to_exit=median_time_to_exit, expected_value_of_outcome= "${:,.0f}".format(round(expected_value_of_outcome*int(equity)/100))
                                     , prob_gain_0_500K=prob_gain_0_500K, prob_gain_500K_1M=prob_gain_500K_1M, prob_gain_1_5M=prob_gain_1_5M, prob_gain_5M_10M=prob_gain_5M_10M, prob_gain_10M_plus=prob_gain_10M_plus,
                                     pARR1=pARR1, pARR2=pARR2, pARR3=pARR3, pARR4=pARR4, pARR5=pARR5, pARR6=pARR6, pARR7=pARR7, pARR8=pARR8, pARR9=pARR9 )
 
@@ -186,16 +205,24 @@ def index():
                 avg_time_to_exit = str(round(int(base_rates[sector][roundVal].get('average time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('average time to exit (days)', 0) != "N/A" else "N/A"
                 median_time_to_exit = str(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
                 expected_value_of_outcome = round(int(base_rates[sector][roundVal].get('Expected value of outcome', 0))) if base_rates[sector][roundVal].get('Expected value of outcome', 0) != "N/A" else "N/A"
-                pARR1 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 0 and 2', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR2 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 2 and 5', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR3 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 5 and 10', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR4 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 10 and 20', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR5 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 20 and 50', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR6 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 50 and 100', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR7 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 100 and 500', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR8 = "{:.2f}%".format(100 * arr[roundVal].get('ARR between 505 and 1000', 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
-                pARR9 = "{:.2f}%".format(100 * arr[roundVal].get("ARR between 1000 and inf", 0)) if arr[roundVal].get('ARR between 0 and 2', 0) != None else "N/A"
+                
+                closest_key = None
+                for key in sorted(float_keys):
+                    closest_key = key
+                    if key >= arrInput/1000000:
+                        break
+                if(closest_key is None):
+                    closest_key = sorted(float_keys)[-1]
 
+                probs = arr[str(closest_key)]
+                pARR1 = "{:.2f}%".format(100 * probs.get('prob_0_2', 0)) if probs.get('prob_0_2', None) is not None else "N/A"
+                pARR2 = "{:.2f}%".format(100 * probs.get('prob_2_5', 0)) if probs.get('prob_2_5', None) is not None else "N/A"
+                pARR3 = "{:.2f}%".format(100 * probs.get('prob_5_10', 0)) if probs.get('prob_5_10', None) is not None else "N/A"
+                pARR4 = "{:.2f}%".format(100 * probs.get('prob_10_20', 0)) if probs.get('prob_10_20', None) is not None else "N/A"
+                pARR5 = "{:.2f}%".format(100 * probs.get('prob_20_50', 0)) if probs.get('prob_20_50', None) is not None else "N/A"
+                pARR6 = "{:.2f}%".format(100 * probs.get('prob_50_100', 0)) if probs.get('prob_50_100', None) is not None else "N/A"
+                pARR7 = "{:.2f}%".format(100 * probs.get('prob_100_500', 0)) if probs.get('prob_100_500', None) is not None else "N/A"
+                pARR8 = "{:.2f}%".format(100 * probs.get('prob_500_1000', 0)) if probs.get('prob_500_1000', None) is not None else "N/A"
 
                 meanExit = int(equity)*expected_value_of_outcome/100
                 try:
@@ -214,9 +241,9 @@ def index():
 
 
                 # Inside the index() function
-                return render_template('resultPB.html', round=roundVal, lastroundvaluation=lastroundvaluation, equity="{:.2f}%".format(int(equity)), sector=sector, median_headcount=median_headcount, estimated_arr_per_fte=estimated_arr_per_fte, estimated_arr=estimated_arr, average_funding=average_funding, median_funding=median_funding, avg_time_to_next_round_typical=avg_time_to_next_round_typical, median_time_to_next_round_typical=median_time_to_next_round_typical, avg_time_to_any_next_round=avg_time_to_any_next_round, median_time_to_any_next_round=median_time_to_any_next_round, avg_time_to_exit=avg_time_to_exit, median_time_to_exit=median_time_to_exit, expected_value_of_outcome= "${:,.0f}".format(round(expected_value_of_outcome*int(equity)/100))
+                return render_template('resultPB.html', round=roundVal, lastroundvaluation=lastroundvaluation, inputARR = arrInput, equity="{:.2f}%".format(int(equity)), sector=sector, median_headcount=median_headcount, estimated_arr_per_fte=estimated_arr_per_fte, estimated_arr=estimated_arr, average_funding=average_funding, median_funding=median_funding, avg_time_to_next_round_typical=avg_time_to_next_round_typical, median_time_to_next_round_typical=median_time_to_next_round_typical, avg_time_to_any_next_round=avg_time_to_any_next_round, median_time_to_any_next_round=median_time_to_any_next_round, avg_time_to_exit=avg_time_to_exit, median_time_to_exit=median_time_to_exit, expected_value_of_outcome= "${:,.0f}".format(round(expected_value_of_outcome*int(equity)/100))
                                     , prob_gain_0_500K=prob_gain_0_500K, prob_gain_500K_1M=prob_gain_500K_1M, prob_gain_1_5M=prob_gain_1_5M, prob_gain_5M_10M=prob_gain_5M_10M, prob_gain_10M_plus=prob_gain_10M_plus,
-                                    pARR1=pARR1, pARR2=pARR2, pARR3=pARR3, pARR4=pARR4, pARR5=pARR5, pARR6=pARR6, pARR7=pARR7, pARR8=pARR8, pARR9=pARR9,
+                                    pARR1=pARR1, pARR2=pARR2, pARR3=pARR3, pARR4=pARR4, pARR5=pARR5, pARR6=pARR6, pARR7=pARR7, pARR8=pARR8,
                                     next1=next1, next2=next2, next3=next3, next4=next4, next5=next5, next6=next6, next7=next7, next8=next8, next9=next9, next10=next10, next11=next11, next12=next12,
                                     exit1=exit1, exit2=exit2, exit3=exit3, exit4=exit4, exit5=exit5, exit6=exit6 )
 
