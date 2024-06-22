@@ -134,7 +134,7 @@ def index():
                 median_time_to_exit = str(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
                 expected_value_of_outcome = round(int(base_rates[sector][roundVal].get('Expected value of outcome', 0))) if base_rates[sector][roundVal].get('Expected value of outcome', 0) != "N/A" else "N/A"
 
-                '''
+                
                 closest_key = None
                 for key in sorted(float_keys):
                     closest_key = key
@@ -153,9 +153,9 @@ def index():
                 pARR7 = "{:.2f}%".format(100 * probs.get('prob_100_500', 0)) if probs.get('prob_100_500', None) is not None else "N/A"
                 pARR8 = "{:.2f}%".format(100 * probs.get('prob_500_1000', 0)) if probs.get('prob_500_1000', None) is not None else "N/A"
                 pARR9 = "{:.2f}%".format(100 * probs.get("prob_1000_inf", 0)) if probs.get('prob_1000_inf', None) is not None else "N/A"
+                
+
                 '''
-
-
                 #these lines for temp only
                 pARR1 = None
                 pARR2 = None
@@ -167,6 +167,7 @@ def index():
                 pARR8 = None
                 pARR9 = None
                 arrInput = 0
+                '''
 
                 meanExit = int(equity)*expected_value_of_outcome/100
                 try:
@@ -181,6 +182,7 @@ def index():
                     prob_gain_1_5M = 0
                     prob_gain_5M_10M = 0
                     prob_gain_10M_plus = 0    
+                
 
 
 
@@ -227,7 +229,7 @@ def index():
                 median_time_to_exit = str(round(int(base_rates[sector][roundVal].get('Median time to exit (days)', 0)))) + " days" if base_rates[sector][roundVal].get('Median time to exit (days)', 0) != "N/A" else "N/A"
                 expected_value_of_outcome = round(int(base_rates[sector][roundVal].get('Expected value of outcome', 0))) if base_rates[sector][roundVal].get('Expected value of outcome', 0) != "N/A" else "N/A"
                 
-                '''
+                
                 closest_key = None
                 for key in sorted(float_keys):
                     closest_key = key
@@ -245,8 +247,9 @@ def index():
                 pARR6 = "{:.2f}%".format(100 * probs.get('prob_50_100', 0)) if probs.get('prob_50_100', None) is not None else "N/A"
                 pARR7 = "{:.2f}%".format(100 * probs.get('prob_100_500', 0)) if probs.get('prob_100_500', None) is not None else "N/A"
                 pARR8 = "{:.2f}%".format(100 * probs.get('prob_500_1000', 0)) if probs.get('prob_500_1000', None) is not None else "N/A"
-                '''
+                
 
+                '''
                 #these lines for temp only
                 pARR1 = None
                 pARR2 = None
@@ -258,6 +261,7 @@ def index():
                 pARR8 = None
                 pARR9 = None
                 arrInput = 0
+                '''
 
                 meanExit = int(equity)*expected_value_of_outcome/100
                 try:
@@ -272,7 +276,7 @@ def index():
                     prob_gain_1_5M = 0
                     prob_gain_5M_10M = 0
                     prob_gain_10M_plus = 0    
-
+                
 
 
                 # Inside the index() function
