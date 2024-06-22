@@ -16,13 +16,13 @@ app.permanent_session_lifetime = timedelta(minutes=10)  # Session timeout durati
 with open("jsonVals.json", 'r') as json_file:
     base_rates = json.load(json_file)
 
-'''
+
 with open("smoothed_probabilities.json", 'r') as json_file:
     arr = json.load(json_file)
 
 float_keys = [float(key) for key in arr.keys()]
 
-'''
+
 
 with open("PitchBook.json", 'r') as json_file:
     pb = json.load(json_file)
