@@ -83,7 +83,7 @@ def index():
             lastroundvaluation = request.form['lastroundvaluation'] 
             equity = request.form['equity'] 
             sector = request.form['sector']
-            '''
+            
             arrInput = request.form['arrinput']
             if arrInput == '':
                 arrInput = 0
@@ -92,7 +92,7 @@ def index():
                 arrInput = int(arrInput)
             except:
                 arrInput = 0
-            '''
+            
 
             if lastroundvaluation == '':
                 lastroundvaluation = 0
