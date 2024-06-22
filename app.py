@@ -7,7 +7,7 @@ from math import exp
 
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = "menloSourcing"
 app.permanent_session_lifetime = timedelta(minutes=10)  # Session timeout duration
 
 
