@@ -51,6 +51,18 @@ def find_valuation_index(i):
     
     return None  # If i doesn't fit in any range, return None
 
+
+
+def sigFigProbs(probability):
+    if probability is not None:
+        formatted_percentage = "{:.3g}%".format(100 * probability)
+        if formatted_percentage == '0.00%':
+            formatted_percentage = "{:.3e}%".format(100 * probability)
+    else:
+        formatted_percentage = "N/A"
+
+    return formatted_percentage
+
 # Hardcoded credentials
 PASSWORD = "menloSourcing"
 
@@ -144,15 +156,15 @@ def index():
                     closest_key = sorted(float_keys)[-1]
 
                 probs = arr[str(closest_key)]
-                pARR1 = "{:.2f}%".format(100 * probs.get('prob_0_2', 0)) if probs.get('prob_0_2', None) is not None else "N/A"
-                pARR2 = "{:.2f}%".format(100 * probs.get('prob_2_5', 0)) if probs.get('prob_2_5', None) is not None else "N/A"
-                pARR3 = "{:.2f}%".format(100 * probs.get('prob_5_10', 0)) if probs.get('prob_5_10', None) is not None else "N/A"
-                pARR4 = "{:.2f}%".format(100 * probs.get('prob_10_20', 0)) if probs.get('prob_10_20', None) is not None else "N/A"
-                pARR5 = "{:.2f}%".format(100 * probs.get('prob_20_50', 0)) if probs.get('prob_20_50', None) is not None else "N/A"
-                pARR6 = "{:.2f}%".format(100 * probs.get('prob_50_100', 0)) if probs.get('prob_50_100', None) is not None else "N/A"
-                pARR7 = "{:.2f}%".format(100 * probs.get('prob_100_500', 0)) if probs.get('prob_100_500', None) is not None else "N/A"
-                pARR8 = "{:.2f}%".format(100 * probs.get('prob_500_1000', 0)) if probs.get('prob_500_1000', None) is not None else "N/A"
-                pARR9 = "{:.2f}%".format(100 * probs.get("prob_1000_inf", 0)) if probs.get('prob_1000_inf', None) is not None else "N/A"
+                pARR1 = sigFigProbs(probs.get('prob_0_2', 0))
+                pARR2 = sigFigProbs(probs.get('prob_2_5', 0))
+                pARR3 = sigFigProbs(probs.get('prob_5_10', 0))
+                pARR4 = sigFigProbs(probs.get('prob_10_20', 0))
+                pARR5 = sigFigProbs(probs.get('prob_20_50', 0))
+                pARR6 = sigFigProbs(probs.get('prob_50_100', 0))
+                pARR7 = sigFigProbs(probs.get('prob_100_500', 0))
+                pARR8 = sigFigProbs(probs.get('prob_500_1000', 0))
+                pARR9 = sigFigProbs(probs.get("prob_1000_inf", 0))
                 
 
                 '''
@@ -239,14 +251,15 @@ def index():
                     closest_key = sorted(float_keys)[-1]
 
                 probs = arr[str(closest_key)]
-                pARR1 = "{:.2f}%".format(100 * probs.get('prob_0_2', 0)) if probs.get('prob_0_2', None) is not None else "N/A"
-                pARR2 = "{:.2f}%".format(100 * probs.get('prob_2_5', 0)) if probs.get('prob_2_5', None) is not None else "N/A"
-                pARR3 = "{:.2f}%".format(100 * probs.get('prob_5_10', 0)) if probs.get('prob_5_10', None) is not None else "N/A"
-                pARR4 = "{:.2f}%".format(100 * probs.get('prob_10_20', 0)) if probs.get('prob_10_20', None) is not None else "N/A"
-                pARR5 = "{:.2f}%".format(100 * probs.get('prob_20_50', 0)) if probs.get('prob_20_50', None) is not None else "N/A"
-                pARR6 = "{:.2f}%".format(100 * probs.get('prob_50_100', 0)) if probs.get('prob_50_100', None) is not None else "N/A"
-                pARR7 = "{:.2f}%".format(100 * probs.get('prob_100_500', 0)) if probs.get('prob_100_500', None) is not None else "N/A"
-                pARR8 = "{:.2f}%".format(100 * probs.get('prob_500_1000', 0)) if probs.get('prob_500_1000', None) is not None else "N/A"
+                pARR1 = sigFigProbs(probs.get('prob_0_2', 0))
+                pARR2 = sigFigProbs(probs.get('prob_2_5', 0))
+                pARR3 = sigFigProbs(probs.get('prob_5_10', 0))
+                pARR4 = sigFigProbs(probs.get('prob_10_20', 0))
+                pARR5 = sigFigProbs(probs.get('prob_20_50', 0))
+                pARR6 = sigFigProbs(probs.get('prob_50_100', 0))
+                pARR7 = sigFigProbs(probs.get('prob_100_500', 0))
+                pARR8 = sigFigProbs(probs.get('prob_500_1000', 0))
+                pARR9 = sigFigProbs(probs.get("prob_1000_inf", 0))
                 
 
                 '''
